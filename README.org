@@ -1,0 +1,63 @@
+#+TITLE: CouchDB: select subset of docs
+#+PROPERTY: header-args:sh :session *shell couchdb-select-random-docs sh* :results silent raw
+#+PROPERTY: header-args:python :session *shell couchdb-select-random-docs python* :results silent raw
+#+OPTIONS: ^:nil
+
+** System environment
+
+- CentOS Linux release 8.1.1911 (Core)
+
+- Python 3.7.0
+
+- CouchDB 3.1.0
+
+Python modules:
+
+- cloudant==2.13.0
+
+** Imports
+
+#+BEGIN_SRC python :tangle src/get_random_docs.py
+import json
+
+from cloudant.client import Cloudant
+#+END_SRC
+
+** Results path
+
+#+BEGIN_SRC python :tangle src/get_random_docs.py
+DATASET = "data/export.json"
+NUMBER_OF_DOCS = 1000
+#+END_SRC
+
+** CouchDB creds
+
+#+BEGIN_SRC python :tangle src/get_random_docs.py
+USER = "admin"
+PASSWORD = "rawpassword"
+NAME = "test"
+URL = "http://127.0.0.1:5984/"
+#+END_SRC
+
+** Connect to the database
+
+#+BEGIN_SRC python :tangle src/get_random_docs.py
+client = Cloudant(USER, PASSWORD, url=URL, connect=True)
+db = client[NAME]
+#+END_SRC
+
+** Select docs subset
+
+#+BEGIN_SRC python :tangle src/get_random_docs.py
+f = open(DATASET, "wt")
+
+n = 0
+for doc in db:
+    del doc["_rev"]
+    f.write(json.dumps(doc)+"\n")
+    n += 1
+    if n >= NUMBER_OF_DOCS:
+        break
+
+f.close()
+#+END_SRC
